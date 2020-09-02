@@ -1,16 +1,133 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Image, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
+import * as firebase from 'firebase'
+import {Form, Item, Input, Label, Button} from 'native-base'
 
 
 
 export default class SignupScreen extends React.Component {
+
+    constructor(props){
+        super(props)
+        this.state ={
+            email: "",
+            password: "",
+            name: "",
+        }
+    }
+
+
+    static navigationOptions = {
+        title: "SignUp",
+        headerShown: false,
+    }
+
+
+    signupUser = (name, email, password)=>{
+        firebase
+            .auth()
+            .createUserWithEmailAndPassword(email,password)
+            .then(
+                authenticate => {
+                    return authenticate.user
+                                .updateProfile({
+                                    displayName: name
+                                })
+                                .then(()=>{ 
+                                    this.props.navigation.replace("Home")
+                                })
+                }
+            )
+            .catch(err => {alert(err.message)})
+    }
+
+
     render(){
   return (
-    <View style={styles.container}>
-      <Text>Signup Screen</Text>
+    <KeyboardAvoidingView
+    behavior = "position"
+    enabled
+    style = {
+        styles.container
+    }
+    >
+      <View style= {styles.logoContainer}>
+          <Image
+          source = {require('../assets/logo.png')}
+          />
+           <Text>LearnCodeOnline.in</Text>
+      </View>
+     <Form style = {styles.form}>
+
+     <Item floatingLabel>
+            <Label>Name</Label>
+            <Input
+            autoCorrect = {false}
+            autoCapitalize = "none"
+            keyboardType = "name-phone-pad"
+            onChangeText = {name=> this.setState({
+                name
+            })}
+            />
+        </Item>
+
+        <Item floatingLabel>
+            <Label>Email</Label>
+            <Input
+            autoCorrect = {false}
+            autoCapitalize = "none"
+            keyboardType = "email-address"
+            onChangeText = {email=> this.setState({
+                email
+            })}
+            />
+        </Item>
+        
+        <Item floatingLabel>
+            <Label>Password</Label>
+            <Input
+            secureTextEntry= {true}
+            autoCorrect = {false}
+            autoCapitalize = "none"
+            keyboardType = "email-address"
+            onChangeText = {password=> this.setState({
+                password
+            })}
+            />
+        </Item>
+        <Button
+        style = {styles.button}
+        full
+        rounded
+        onPress = {
+            () => {
+              this.signupUser(
+                  this.state.name,
+                  this.state.email,
+                  this.state.password,
+              ) 
+            }
+        }
+        >
+        <Text style = {styles.buttonText}>Sign Up</Text>
+        </Button>
+        
+
+     </Form>
+     <View style = {styles.footer}>
+         <Text>OR</Text>
+     </View>
+     <TouchableOpacity
+     onPress = {()=>{
+        this.props.navigation.navigate("SignIn")
+     }}
+     >
+         <Text style ={{alignSelf: 'center', paddingTop: 20}}>already having an account ?</Text>
+     </TouchableOpacity>
+
       <StatusBar style="auto" />
-    </View>
+      </KeyboardAvoidingView>
   );}
 }
 
